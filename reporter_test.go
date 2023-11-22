@@ -449,7 +449,7 @@ func TestDiffFile(t *testing.T) {
 			desc: "no fingerprint after",
 			before: &fspb.File{
 				Path:        "/tmp/testfile",
-				Fingerprint: []*fspb.Fingerprint{&fspb.Fingerprint{Value: "abcd"}},
+				Fingerprint: []*fspb.Fingerprint{{Value: "abcd"}},
 			},
 			after: &fspb.File{
 				Path: "/tmp/testfile",
@@ -459,11 +459,11 @@ func TestDiffFile(t *testing.T) {
 			desc: "diff fingerprints",
 			before: &fspb.File{
 				Path:        "/tmp/testfile",
-				Fingerprint: []*fspb.Fingerprint{&fspb.Fingerprint{Value: "abcd"}},
+				Fingerprint: []*fspb.Fingerprint{{Value: "abcd"}},
 			},
 			after: &fspb.File{
 				Path:        "/tmp/testfile",
-				Fingerprint: []*fspb.Fingerprint{&fspb.Fingerprint{Value: "efgh"}},
+				Fingerprint: []*fspb.Fingerprint{{Value: "efgh"}},
 			},
 			wantDiff: "fingerprint: abcd => efgh",
 		}, {
@@ -473,7 +473,7 @@ func TestDiffFile(t *testing.T) {
 			},
 			after: &fspb.File{
 				Path:        "/tmp/testfile",
-				Fingerprint: []*fspb.Fingerprint{&fspb.Fingerprint{Value: "abcd"}},
+				Fingerprint: []*fspb.Fingerprint{{Value: "abcd"}},
 			},
 			wantDiff: "",
 		},
@@ -512,7 +512,7 @@ func TestCompare(t *testing.T) {
 			before: nil,
 			after: &fspb.Walk{
 				File: []*fspb.File{
-					&fspb.File{Path: "/a/b/c", Info: &fspb.FileInfo{}},
+					{Path: "/a/b/c", Info: &fspb.FileInfo{}},
 				},
 			},
 			added: 1,
@@ -521,7 +521,7 @@ func TestCompare(t *testing.T) {
 			before: &fspb.Walk{
 				Id: "1",
 				File: []*fspb.File{
-					&fspb.File{Path: "/a/b/c", Info: &fspb.FileInfo{}},
+					{Path: "/a/b/c", Info: &fspb.FileInfo{}},
 				},
 			},
 			after:   &fspb.Walk{Id: "2"},
@@ -536,17 +536,17 @@ func TestCompare(t *testing.T) {
 			before: &fspb.Walk{
 				Id: "1",
 				File: []*fspb.File{
-					&fspb.File{Path: "/a/b/c", Info: &fspb.FileInfo{}},
-					&fspb.File{Path: "/e/f/g", Info: &fspb.FileInfo{Size: 4}},
-					&fspb.File{Path: "/x/y/z", Info: &fspb.FileInfo{}},
+					{Path: "/a/b/c", Info: &fspb.FileInfo{}},
+					{Path: "/e/f/g", Info: &fspb.FileInfo{Size: 4}},
+					{Path: "/x/y/z", Info: &fspb.FileInfo{}},
 				},
 			},
 			after: &fspb.Walk{
 				Id: "2",
 				File: []*fspb.File{
-					&fspb.File{Path: "/b/c/d", Info: &fspb.FileInfo{}},
-					&fspb.File{Path: "/e/f/g", Info: &fspb.FileInfo{Size: 7}},
-					&fspb.File{Path: "/x/y/z", Info: &fspb.FileInfo{}},
+					{Path: "/b/c/d", Info: &fspb.FileInfo{}},
+					{Path: "/e/f/g", Info: &fspb.FileInfo{Size: 7}},
+					{Path: "/x/y/z", Info: &fspb.FileInfo{}},
 				},
 			},
 			added:    1,
@@ -557,13 +557,13 @@ func TestCompare(t *testing.T) {
 			before: &fspb.Walk{
 				Id: "1",
 				File: []*fspb.File{
-					&fspb.File{Path: "/ignore/a", Info: &fspb.FileInfo{}},
+					{Path: "/ignore/a", Info: &fspb.FileInfo{}},
 				},
 			},
 			after: &fspb.Walk{
 				Id: "2",
 				File: []*fspb.File{
-					&fspb.File{Path: "/ignore/b", Info: &fspb.FileInfo{}},
+					{Path: "/ignore/b", Info: &fspb.FileInfo{}},
 				},
 			},
 		}, {
@@ -571,13 +571,13 @@ func TestCompare(t *testing.T) {
 			before: &fspb.Walk{
 				Id: "1",
 				File: []*fspb.File{
-					&fspb.File{Path: "/a/b/c/", Info: &fspb.FileInfo{IsDir: true}},
+					{Path: "/a/b/c/", Info: &fspb.FileInfo{IsDir: true}},
 				},
 			},
 			after: &fspb.Walk{
 				Id: "2",
 				File: []*fspb.File{
-					&fspb.File{Path: "/a/b/c", Info: &fspb.FileInfo{IsDir: true}},
+					{Path: "/a/b/c", Info: &fspb.FileInfo{IsDir: true}},
 				},
 			},
 		},
