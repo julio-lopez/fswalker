@@ -97,16 +97,16 @@ func writeTextProto(ctx context.Context, path string, pb proto.Message) error {
 }
 
 // ReadFile reads the file named by filename and returns the contents.
-var ReadFile = func(_ context.Context, filename string) ([]byte, error) {
+func ReadFile(_ context.Context, filename string) ([]byte, error) {
 	return ioutil.ReadFile(filename)
 }
 
 // WriteFile writes data to a file named by filename.
-var WriteFile = func(_ context.Context, filename string, data []byte, perm os.FileMode) error {
+func WriteFile(_ context.Context, filename string, data []byte, perm os.FileMode) error {
 	return ioutil.WriteFile(filename, data, perm)
 }
 
 // Glob returns the names of all files matching pattern or nil if there is no matching file.
-var Glob = func(_ context.Context, pattern string) ([]string, error) {
+func Glob(_ context.Context, pattern string) ([]string, error) {
 	return filepath.Glob(pattern)
 }
