@@ -1,0 +1,39 @@
+name: Build
+on:
+  pull_request:
+  push:
+    branches: [ main, local, test/gha ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      -
+        name: Check out repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      -
+        name: Setup Go
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        with:
+          cache: true
+          go-version-file: 'go.mod'
+      -
+        name: Downnlaod Go modules
+        run: go mod download -json
+      -
+        name: Install golint
+        run: go install golang.org/x/lint/golint@latest
+      -
+        name: Check formatting
+        run: gofmt -d -e -l -s .
+      -
+        name: Lint
+        run: golint -set_exit_status ./...
+      -
+        name: Build and test
+        run: |
+          go test -v ./...
+          go build ./cmd/walker
+          go build ./cmd/reporter
