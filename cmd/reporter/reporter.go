@@ -44,10 +44,7 @@ func askUpdateReviews() bool {
 	fmt.Print("Do you want to update the \"last known good\" to this [y/N]: ")
 	var input string
 	fmt.Scanln(&input)
-	if strings.ToLower(strings.TrimSpace(input)) == "y" {
-		return true
-	}
-	return false
+	return strings.ToLower(strings.TrimSpace(input)) == "y"
 }
 
 func walksByLatest(ctx context.Context, r *fswalker.Reporter, hostname, reviewFile, walkPath string) (*fswalker.WalkFile, *fswalker.WalkFile, error) {
