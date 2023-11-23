@@ -235,7 +235,7 @@ func (w *Walker) worker(ctx context.Context, chPaths <-chan string) error {
 			p = NormalizePath(p, info.IsDir())
 			if err != nil {
 				msg := fmt.Sprintf("failed to walk %q: %s", p, err)
-				log.Printf(msg)
+				log.Print(msg)
 				w.addNotificationToWalk(fspb.Notification_WARNING, p, msg)
 				return nil // returning SkipDir on a file would skip the rest of the files in the dir
 			}
@@ -266,7 +266,7 @@ func (w *Walker) worker(ctx context.Context, chPaths <-chan string) error {
 			}
 			if !w.pol.WalkCrossDevice && f.Stat != nil && baseDev != f.Stat.Dev {
 				msg := fmt.Sprintf("skipping %q: file is on different device", p)
-				log.Printf(msg)
+				log.Print(msg)
 				if w.Verbose {
 					w.addNotificationToWalk(fspb.Notification_INFO, p, msg)
 				}
