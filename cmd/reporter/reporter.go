@@ -65,13 +65,13 @@ func walksByLatest(ctx context.Context, r *fswalker.Reporter, hostname, reviewFi
 func walksByFiles(ctx context.Context, r *fswalker.Reporter, beforeFile, afterFile string) (*fswalker.WalkFile, *fswalker.WalkFile, error) {
 	after, err := r.ReadWalk(ctx, afterFile)
 	if err != nil {
-		return nil, nil, fmt.Errorf("File cannot be read: %s", afterFile)
+		return nil, nil, fmt.Errorf("file cannot be read: %s", afterFile)
 	}
 	var before *fswalker.WalkFile
 	if beforeFile != "" {
 		before, err = r.ReadWalk(ctx, beforeFile)
 		if err != nil {
-			return nil, nil, fmt.Errorf("File cannot be read: %s", beforeFile)
+			return nil, nil, fmt.Errorf("file cannot be read: %s", beforeFile)
 		}
 	}
 	return before, after, nil
