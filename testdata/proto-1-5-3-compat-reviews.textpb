@@ -1,0 +1,11 @@
+review: {
+  key: "somehost"
+  value: {
+    walk_id: "035457ff-a958-410a-8619-fe3e0d567bfd"
+    walk_reference: "walk-file-path"
+    fingerprint: {
+      method: SHA256
+      value: "0354fe3e0d567bfd"
+    }
+  }
+}
