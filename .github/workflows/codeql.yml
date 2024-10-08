@@ -39,6 +39,11 @@ jobs:
         check-latest: true
         go-version-file: 'go.mod'
     -
+      name: Build
+      run: |
+        go build ./...
+        go test -list ./...
+    -
       name: Initialize CodeQL
       uses: github/codeql-action/init@4b6aa0b07da05d6e43d0e5f9c8596a6532ce1c85 # v2.22.7
       with:
@@ -49,12 +54,6 @@ jobs:
 
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
-
-    # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
-    # If this step fails, then you should remove it and run the build manually
-    -
-      name: Autobuild
-      uses: github/codeql-action/autobuild@4b6aa0b07da05d6e43d0e5f9c8596a6532ce1c85 # v2.22.7
     - 
       name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@4b6aa0b07da05d6e43d0e5f9c8596a6532ce1c85 # v2.22.7
