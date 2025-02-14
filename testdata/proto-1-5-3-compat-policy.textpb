@@ -1,0 +1,10 @@
+version: 1
+include: "/"
+exclude_pfx: "/var/log/"
+exclude_pfx: "/home/"
+exclude_pfx: "/tmp/"
+hash_pfx: "/etc/"
+max_hash_file_size: 1048576
+walk_cross_device: true
+ignore_irregular_files: true
+max_directory_depth: 1265
