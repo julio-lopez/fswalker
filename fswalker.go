@@ -20,6 +20,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"hash"
 	"io"
 	"os"
 	"path/filepath"
@@ -67,6 +68,10 @@ func NormalizePath(path string, isDir bool) string {
 // sha256sum reads a regular file at path up to maxBytes and builds a SHA-256
 // sum over its content. sha256sum returns an error if the file is larger than maxBytes.
 func sha256sum(path string, maxBytes int64) (string, error) {
+	return fingerprintFile(path, maxBytes, sha256.New)
+}
+
+func fingerprintFile(path string, maxBytes int64, newHash func() hash.Hash) (string, error) {
 	if maxBytes < 0 {
 		return "", fmt.Errorf("negative max hash file size: %d", maxBytes)
 	}
@@ -89,7 +94,7 @@ func sha256sum(path string, maxBytes int64) (string, error) {
 		return "", fmt.Errorf("file size (%d bytes) exceeds max hash file size (%d bytes)", fi.Size(), maxBytes)
 	}
 
-	h := sha256.New()
+	h := newHash()
 	n, err := io.Copy(h, io.LimitReader(f, maxBytes+1))
 	if err != nil {
 		return "", err
