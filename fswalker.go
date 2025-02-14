@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/zeebo/blake3"
 	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
 )
@@ -78,7 +79,9 @@ func sha256sum(path string) (string, error) {
 }
 
 func blake3sum(path string) (string, error) {
-	return fingerprintFile(path, sha256.New)
+	return fingerprintFile(path, func() hash.Hash {
+		return blake3.New()
+	})
 }
 
 func fingerprintFile(path string, newHash func() hash.Hash) (string, error) {
