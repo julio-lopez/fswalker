@@ -282,7 +282,7 @@ func (w *Walker) worker(ctx context.Context, chPaths <-chan string) error {
 			}
 			if !w.pol.WalkCrossDevice && f.Stat != nil && baseDev != f.Stat.Dev {
 				msg := fmt.Sprintf("skipping %q: file is on different device", p)
-				log.Printf(msg)
+				log.Print(msg)
 				if w.Verbose {
 					w.addNotificationToWalk(fspb.Notification_INFO, p, msg)
 				}
