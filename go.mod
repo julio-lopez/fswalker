@@ -7,5 +7,11 @@ toolchain go1.27.4
 require (
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
+	github.com/zeebo/blake3 v0.2.4
 	google.golang.org/protobuf v1.36.12
+)
+
+require (
+	github.com/klauspost/cpuid/v2 v2.4.2 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 )
