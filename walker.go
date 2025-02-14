@@ -101,12 +101,9 @@ func (w *Walker) convert(path string, info os.FileInfo) (*fspb.File, error) {
 		return f, nil
 	}
 
-	var shaSum string
 	// Only build the hash sum if requested and if it is not a directory.
 	if w.wantHashing(path) && !info.IsDir() && info.Size() <= w.pol.MaxHashFileSize {
-		var err error
-		shaSum, err = sha256sum(path)
-		if err != nil {
+		if shaSum, err := sha256sum(path); err != nil {
 			log.Printf("unable to build hash for %s: %s", path, err)
 		} else {
 			f.Fingerprint = []*fspb.Fingerprint{
