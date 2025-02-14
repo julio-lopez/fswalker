@@ -47,6 +47,18 @@ message ReportConfig {
   repeated string exclude_pfx = 2;
 }
 
+// Fingerprint is a unique identifier for a given File.
+// It consists of a Method (e.g. SHA256) and a value.
+message Fingerprint {
+  enum Method {
+    UNKNOWN = 0;
+    SHA256  = 1;
+    BLAKE3  = 3;
+  }
+  Method method = 1;
+  string value = 2;
+}
+
 message Policy {
   // version is the version of the proto structure.
   uint32 version = 1;
@@ -83,6 +95,9 @@ message Policy {
   // walk into an included directory.
   // Defaults to no restriction on depth (i.e. go all the way).
   uint32 max_directory_depth = 32;
+
+  // fingerprint method to use
+  Fingerprint.Method fingerprint_method = 33;
 }
 
 message Walk {
@@ -155,16 +170,6 @@ message FileStat {
   google.protobuf.Timestamp ctime = 13;
 }
 
-// Fingerprint is a unique identifier for a given File.
-// It consists of a Method (e.g. SHA256) and a value.
-message Fingerprint {
-  enum Method {
-    UNKNOWN = 0;
-    SHA256  = 1;
-  }
-  Method method = 1;
-  string value = 2;
-}
 
 message File {
   // version is the version of the proto structure.
