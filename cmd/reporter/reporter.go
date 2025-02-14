@@ -156,8 +156,12 @@ func main() {
 	}
 
 	if *paginate {
-		out.Close()
-		cmd.Wait()
+		if err := out.Close(); err != nil {
+			log.Println("closing output:", err)
+		}
+		if err := cmd.Wait(); err != nil {
+			log.Println("waiting for command:", err)
+		}
 	}
 
 	// Update reviews file if desired.
