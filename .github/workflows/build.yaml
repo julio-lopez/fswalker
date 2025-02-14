@@ -1,0 +1,85 @@
+name: Build
+on:
+  pull_request:
+  push:
+    branches: [ main, local, test/gha ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      -
+        name: Check out repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      -
+        name: Setup Go
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+        with:
+          cache: true
+          check-latest: true
+          go-version-file: 'go.mod'
+      -
+        name: Downnlaod Go modules
+        run: go mod download -json
+      -
+        name: Install golint
+        run: go install golang.org/x/lint/golint@latest
+      -
+        name: Check formatting
+        run: gofmt -d -e -l -s .
+      -
+        name: Lint
+        run: golint -set_exit_status ./...
+      -
+        name: Build and test
+        run: |
+          go test -v ./...
+          go build ./cmd/walker
+          go build ./cmd/reporter
+
+  checks:
+    name: Static Checks
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+    -
+      name: Checkout repo
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+    -
+      name: Setup Go
+      uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+      with:
+        cache: true
+        check-latest: true
+        go-version-file: 'go.mod'
+    -
+      id: govulncheck
+      name: govulncheck
+      uses: golang/govulncheck-action@b625fbe08f3bccbe446d94fbf87fcc875a4f50ee # v1.0.4
+      with:
+        cache: false
+        go-version-file: 'go.mod'
+        go-version-input:
+        repo-checkout: false
+    -
+      name: Build
+      run: go build ./...
+    -
+      name: staticcheck
+      uses: dominikh/staticcheck-action@fe1dd0c3658873b46f8c9bb3291096a617310ca6 # v1.3.1
+      continue-on-error: true
+      with:
+        version: "2024.1.1"
+        install-go: false
+    -
+      name: golangci-lint
+      uses: golangci/golangci-lint-action@aaa42aa0628b4ae2578232a66b541047968fac86 # v6.1.0
+      with:
+        version: v1.61.0
+        # skip-cache: true
+        # skip-save-cache: true
