@@ -43,7 +43,9 @@ var (
 func askUpdateReviews() bool {
 	fmt.Print("Do you want to update the \"last known good\" to this [y/N]: ")
 	var input string
-	fmt.Scanln(&input)
+	if _, err := fmt.Scanln(&input); err != nil {
+		log.Fatal("error requesting update confirmation: ", err)
+	}
 	if strings.ToLower(strings.TrimSpace(input)) == "y" {
 		return true
 	}
