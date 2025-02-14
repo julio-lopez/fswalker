@@ -28,7 +28,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/google/fswalker/internal/metrics"
 	fspb "github.com/google/fswalker/proto/fswalker"
 )
 
@@ -218,14 +217,17 @@ func TestWantHashing(t *testing.T) {
 }
 
 func TestConvert(t *testing.T) {
-	wlkr := &Walker{
-		pol: &fspb.Policy{
-			HashPfx: []string{
-				testdataDir,
-			},
-			MaxHashFileSize: 1048576,
+	wlkr, err := WalkerFromPolicy(&fspb.Policy{
+		HashPfx: []string{
+			testdataDir,
 		},
+		MaxHashFileSize:   1048576,
+		FingerprintMethod: fspb.Fingerprint_SHA256,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
+
 	path := filepath.Join(testdataDir, "hashSumTest")
 	st := syscall.Stat_t{
 		Dev:     1,
@@ -318,19 +320,20 @@ func TestRun(t *testing.T) {
 	})
 
 	writer := outpathWriter(tmpfile.Name())
-	wlkr := &Walker{
-		pol: &fspb.Policy{
-			Include: []string{
-				testdataDir,
-			},
-			HashPfx: []string{
-				testdataDir,
-			},
-			MaxHashFileSize: 1048576,
+	wlkr, err := WalkerFromPolicy(&fspb.Policy{
+		Include: []string{
+			testdataDir,
 		},
-		WalkCallback: writer.writeWalk,
-		Counter:      &metrics.Counter{},
+		HashPfx: []string{
+			testdataDir,
+		},
+		MaxHashFileSize: 1048576,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	wlkr.WalkCallback = writer.writeWalk
 
 	if err := wlkr.Run(ctx); err != nil {
 		t.Errorf("Run() error: %v", err)
