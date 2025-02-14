@@ -1,14 +1,15 @@
 package fswalker_test
 
 import (
+	"bytes"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/google/go-cmp/cmp"
-	tspb "google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	fspb "github.com/google/fswalker/proto/fswalker"
 )
@@ -45,7 +46,7 @@ func TestReadCompatProtoData(t *testing.T) {
 		tc := tc
 		t.Run("read-compat-"+tc.protoType, func(t *testing.T) {
 			got := proto.Clone(tc.want)
-			got.Reset()
+			proto.Reset(got)
 
 			got = readProtoBin(t, got, "testdata/proto-1-5-3-compat-"+tc.protoType+".pb")
 
@@ -53,7 +54,7 @@ func TestReadCompatProtoData(t *testing.T) {
 				t.Errorf("%s marshalled binary message did not match: %s", tc.protoType, cmp.Diff(tc.want, got, cmp.Comparer(proto.Equal)))
 			}
 
-			got.Reset()
+			proto.Reset(got)
 			readProtoText(t, got, "testdata/proto-1-5-3-compat-"+tc.protoType+".textpb")
 
 			if !proto.Equal(tc.want, got) {
@@ -121,8 +122,8 @@ func getTestWalk() *fspb.Walk {
 		Id:        "3ca83f34-0a8f-4fb5-9c94-c542fb06de35",
 		Version:   1,
 		Hostname:  "testhost",
-		StartWalk: tspb.New(time.Date(2023, 02, 21, 07, 34, 12, 433242, time.UTC)),
-		StopWalk:  tspb.New(time.Date(2023, 02, 21, 07, 35, 48, 122488, time.UTC)),
+		StartWalk: timestamppb.New(time.Date(2023, 02, 21, 07, 34, 12, 433242, time.UTC)),
+		StopWalk:  timestamppb.New(time.Date(2023, 02, 21, 07, 35, 48, 122488, time.UTC)),
 		Policy:    getTestPolicy(),
 		File: []*fspb.File{
 			{
@@ -183,10 +184,14 @@ func writeProtoBin(t *testing.T, m proto.Message, filename string) {
 func writeProtoText(t *testing.T, m proto.Message, filename string) {
 	t.Helper()
 
-	s := proto.MarshalTextString(m)
-	s = strings.Replace(strings.Replace(s, "<", "{", -1), ">", "}", -1)
+	b, err := prototext.Marshal(m)
+	if err != nil {
+		t.Fatal("problems marshaling proto message:", err)
+	}
 
-	if err := os.WriteFile(filename, []byte(s), 0644); err != nil {
+	b = bytes.Replace(bytes.Replace(b, []byte("<"), []byte("{"), -1), []byte(">"), []byte("}"), -1)
+
+	if err = os.WriteFile(filename, b, 0644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -214,7 +219,7 @@ func readProtoText(t *testing.T, m proto.Message, filename string) proto.Message
 		t.Fatalf("when reading %q: %v", filename, err)
 	}
 
-	if err := proto.UnmarshalText(string(b), m); err != nil {
+	if err := prototext.Unmarshal(b, m); err != nil {
 		t.Fatalf("unmarshaling from %q: %v", filename, err)
 	}
 
