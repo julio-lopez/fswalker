@@ -39,7 +39,7 @@ func (o outpathWriter) writeWalk(ctx context.Context, walk *fspb.Walk) error {
 	if err != nil {
 		return err
 	}
-	return WriteFile(ctx, string(o), walkBytes, 0444)
+	return WriteFile(ctx, string(o), walkBytes, 0o444)
 }
 
 // testFile implements the os.FileInfo interface.
@@ -220,16 +220,18 @@ func TestWantHashing(t *testing.T) {
 func TestConvert(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "hashSumTest")
-	if err := os.WriteFile(path, []byte("hello"), 0600); err != nil {
+	if err := os.WriteFile(path, []byte("hello"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	wlkr := &Walker{
-		pol: &fspb.Policy{
-			HashPfx: []string{
-				dir,
-			},
-			MaxHashFileSize: 1048576,
+	wlkr, err := WalkerFromPolicy(&fspb.Policy{
+		HashPfx: []string{
+			dir,
 		},
+		MaxHashFileSize:   1048576,
+		FingerprintMethod: fspb.Fingerprint_SHA256,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 	st := syscall.Stat_t{
 		Dev:     1,
@@ -323,11 +325,11 @@ func TestRun(t *testing.T) {
 
 	dir := t.TempDir()
 	smallFile := filepath.Join(dir, "small.txt")
-	if err := os.WriteFile(smallFile, []byte("hello"), 0600); err != nil {
+	if err := os.WriteFile(smallFile, []byte("hello"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	largeFile := filepath.Join(dir, "large.txt")
-	if err := os.WriteFile(largeFile, []byte("hello world"), 0600); err != nil {
+	if err := os.WriteFile(largeFile, []byte("hello world"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	linkFile := filepath.Join(dir, "link.txt")
@@ -336,15 +338,17 @@ func TestRun(t *testing.T) {
 	}
 
 	writer := outpathWriter(tmpfile.Name())
-	wlkr := &Walker{
-		pol: &fspb.Policy{
-			Include:         []string{dir},
-			HashPfx:         []string{dir},
-			MaxHashFileSize: 6, // larger than smallFile, but smaller than largeFile.
-		},
-		WalkCallback: writer.writeWalk,
-		Counter:      &metrics.Counter{},
+	wlkr, err := WalkerFromPolicy(&fspb.Policy{
+		Include:         []string{dir},
+		HashPfx:         []string{dir},
+		MaxHashFileSize: 6, // larger than smallFile, but smaller than largeFile.
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	wlkr.WalkCallback = writer.writeWalk
+	wlkr.Counter = &metrics.Counter{}
 
 	if err := wlkr.Run(ctx); err != nil {
 		t.Errorf("Run() error: %v", err)
