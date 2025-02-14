@@ -62,8 +62,9 @@ func (t *testFile) Sys() interface{}   { return t.sys }
 func TestWalkerFromPolicyFile(t *testing.T) {
 	path := filepath.Join(testdataDir, "defaultClientPolicy.asciipb")
 	wantPol := &fspb.Policy{
-		Version:         1,
-		MaxHashFileSize: 1048576,
+		Version:           1,
+		FingerprintMethod: defaultFingerprintMethod,
+		MaxHashFileSize:   1048576,
 		Include: []string{
 			"/",
 		},

@@ -47,6 +47,8 @@ const (
 	countFileSizeSum = "file-size-sum"
 	countStatErr     = "file-stat-errors"
 	countHashes      = "file-hash-count"
+
+	defaultFingerprintMethod = fspb.Fingerprint_SHA256
 )
 
 // WalkCallback is called by Walker at the end of the Run.
@@ -72,6 +74,7 @@ func WalkerFromPolicy(pol *fspb.Policy) (*Walker, error) {
 	switch pol.FingerprintMethod {
 	case fspb.Fingerprint_SHA256, fspb.Fingerprint_UNKNOWN:
 		fingerprintFunc = sha256sum
+		pol.FingerprintMethod = defaultFingerprintMethod
 	case fspb.Fingerprint_BLAKE3:
 		fingerprintFunc = blake3sum
 	}
