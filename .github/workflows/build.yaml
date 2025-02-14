@@ -1,0 +1,103 @@
+name: Build
+on:
+  pull_request:
+  push:
+    branches: [ main, local, test/gha ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    -
+      uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+      with:
+        egress-policy: audit
+    -
+      name: Check out repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    -
+      name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        cache: true
+        check-latest: true
+        go-version-file: 'go.mod'
+    -
+      name: Downnlaod Go modules
+      run: go mod download -json
+    -
+      name: Install golint
+      run: go install golang.org/x/lint/golint@latest
+    -
+      name: Check formatting
+      run: gofmt -d -e -l -s .
+    -
+      name: Lint
+      run: golint -set_exit_status ./...
+    -
+      name: Build and test
+      run: |
+        go test -v ./...
+        go build ./cmd/walker
+        go build ./cmd/reporter
+
+  checks:
+    name: Static Checks
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+    -
+      uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+      with:
+        egress-policy: audit
+    -
+      name: Checkout repo
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    -
+      name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        cache: true
+        check-latest: true
+        go-version-file: 'go.mod'
+    -
+      id: govulncheck
+      name: govulncheck
+      # generate report and then fail if issues are found
+      run: |
+        go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
+        govulncheck -format sarif ./... > govulncheck.sarif
+        govulncheck ./...
+    -
+      id: govulncheck-results
+      if: ${{ always() }}
+      name: "Upload govulncheck results to dashboard"
+      uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v3.29.5
+      with:
+        sarif_file: govulncheck.sarif
+    -
+      name: Build
+      run: go build ./...
+    -
+      name: staticcheck
+      uses: dominikh/staticcheck-action@9716614d4101e79b4340dd97b10e54d68234e431 # v1.4.1
+      continue-on-error: true
+      with:
+        version: "2025.1.1"
+        install-go: false
+        use-cache: false
+    -
+      name: golangci-lint
+      uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+      with:
+        version: v2.6.1
+        # Use a long invalidation interval, the go.mod hash is more likely to
+        # change more frequently and force a cache invalidation anyway.
+        cache-invalidation-interval: 60
+        #skip-cache: true
+        #skip-save-cache: true
