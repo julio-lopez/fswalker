@@ -176,7 +176,7 @@ func (r *Reporter) ReadLastGoodWalk(ctx context.Context, hostname, reviewFile st
 }
 
 // ErrSameWalks is returned when comparing a walk with the same walk.
-var ErrSameWalks = fmt.Errorf("Walks are the same")
+var ErrSameWalks = fmt.Errorf("walks are the same")
 
 // sanityCheck runs a few checks to ensure the "before" and "after" Walks are sane-ish.
 func (r *Reporter) sanityCheck(before, after *fspb.Walk) error {
