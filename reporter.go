@@ -577,6 +577,9 @@ func (r *Reporter) UpdateReviewProto(ctx context.Context, walkFile *WalkFile, re
 			return err
 		}
 
+		if reviews.Review == nil {
+			reviews.Review = make(map[string]*fspb.Review)
+		}
 		reviews.Review[walkFile.Walk.Hostname] = review
 		if err := writeTextProto(ctx, reviewFile, reviews); err != nil {
 			return err
