@@ -2,7 +2,7 @@ module github.com/google/fswalker
 
 go 1.23
 
-toolchain go1.24.1
+toolchain go1.23.7
 
 require (
 	github.com/google/go-cmp v0.7.0
