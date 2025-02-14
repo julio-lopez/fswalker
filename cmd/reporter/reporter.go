@@ -46,10 +46,7 @@ func askUpdateReviews() bool {
 	if _, err := fmt.Scanln(&input); err != nil {
 		log.Fatal("error requesting update confirmation: ", err)
 	}
-	if strings.ToLower(strings.TrimSpace(input)) == "y" {
-		return true
-	}
-	return false
+	return strings.ToLower(strings.TrimSpace(input)) == "y"
 }
 
 func walksByLatest(ctx context.Context, r *fswalker.Reporter, hostname, reviewFile, walkPath string) (*fswalker.WalkFile, *fswalker.WalkFile, error) {
