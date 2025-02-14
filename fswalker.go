@@ -29,6 +29,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/zeebo/blake3"
 	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
 )
@@ -80,7 +81,9 @@ func sha256sum(path string, maxBytes int64) (string, error) {
 }
 
 func blake3sum(path string, maxBytes int64) (string, error) {
-	return fingerprintFile(path, maxBytes, sha256.New)
+	return fingerprintFile(path, maxBytes, func() hash.Hash {
+		return blake3.New()
+	})
 }
 
 func fingerprintFile(path string, maxBytes int64, newHash func() hash.Hash) (string, error) {
