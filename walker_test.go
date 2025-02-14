@@ -309,6 +309,99 @@ func TestConvert(t *testing.T) {
 	}
 }
 
+func TestConvertBlake3(t *testing.T) {
+	wlkr, err := WalkerFromPolicy(&fspb.Policy{
+		HashPfx: []string{
+			testdataDir,
+		},
+		MaxHashFileSize:   1048576,
+		FingerprintMethod: fspb.Fingerprint_BLAKE3,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(testdataDir, "hashSumTest")
+	st := syscall.Stat_t{
+		Dev:     1,
+		Ino:     123456,
+		Nlink:   2,
+		Mode:    0640,
+		Uid:     123,
+		Gid:     456,
+		Rdev:    111,
+		Size:    100,
+		Blksize: 128,
+		Blocks:  10,
+	}
+	atime := syscall.Timespec{Sec: time.Now().Unix(), Nsec: 100}
+	mtime := syscall.Timespec{Sec: time.Now().Unix(), Nsec: 200}
+	ctime := syscall.Timespec{Sec: time.Now().Unix(), Nsec: 300}
+	st = setTimes(st, atime, mtime, ctime)
+
+	info := &testFile{
+		name:    "hashSumTest",
+		size:    100,
+		mode:    os.FileMode(0640),
+		modTime: time.Now(),
+		isDir:   false,
+		sys:     &st,
+	}
+
+	mts := timestamppb.New(info.ModTime())
+	wantFile := &fspb.File{
+		Version: 1,
+		Path:    path,
+		Info: &fspb.FileInfo{
+			Name:     "hashSumTest",
+			Size:     100,
+			Mode:     0640,
+			Modified: mts,
+			IsDir:    false,
+		},
+		Stat: &fspb.FileStat{
+			Dev:     1,
+			Inode:   123456,
+			Nlink:   2,
+			Mode:    0640,
+			Uid:     123,
+			Gid:     456,
+			Rdev:    111,
+			Size:    100,
+			Blksize: 128,
+			Blocks:  10,
+			Atime:   &timestamppb.Timestamp{Seconds: atime.Sec, Nanos: int32(atime.Nsec)},
+			Mtime:   &timestamppb.Timestamp{Seconds: mtime.Sec, Nanos: int32(mtime.Nsec)},
+			Ctime:   &timestamppb.Timestamp{Seconds: ctime.Sec, Nanos: int32(ctime.Nsec)},
+		},
+		Fingerprint: []*fspb.Fingerprint{
+			{
+				Method: fspb.Fingerprint_BLAKE3,
+				Value:  "edf0c8c82838174ea13e63da14d0646cf83b1a3b8aa640f532247dd72f10fed6",
+			},
+		},
+	}
+
+	gotFile, err := wlkr.convert(path, nil) // ensuring there is no problems with nil file stats.
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if wantFile.Path != gotFile.Path {
+		t.Errorf("convert() path = %q; want: %q", gotFile.Path, wantFile.Path)
+	}
+
+	gotFile, err = wlkr.convert(path, info)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	diff := cmp.Diff(gotFile, wantFile, cmp.Comparer(proto.Equal))
+	if diff != "" {
+		t.Errorf("convert() File proto: diff (-want +got):\n%s", diff)
+	}
+}
+
 func TestRun(t *testing.T) {
 	ctx := context.Background()
 	tmpfile, err := os.CreateTemp("", "walk.pb")
