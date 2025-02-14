@@ -16,6 +16,7 @@ package fswalker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -59,9 +60,23 @@ func WalkerFromPolicyFile(ctx context.Context, path string) (*Walker, error) {
 	if err := readTextProto(ctx, path, pol); err != nil {
 		return nil, err
 	}
+
+	fingerprintFunc := func(string) (string, error) {
+		return "", errors.New("no fingerprinting function")
+	}
+
+	switch pol.FingerprintMethod {
+	case fspb.Fingerprint_SHA256, fspb.Fingerprint_UNKNOWN:
+		fingerprintFunc = sha256sum
+	case fspb.Fingerprint_BLAKE3:
+		fingerprintFunc = blake3sum
+	}
+
 	return &Walker{
 		pol:     pol,
 		Counter: &metrics.Counter{},
+
+		fingerPrintFunc: fingerprintFunc,
 	}, nil
 }
 
@@ -86,6 +101,8 @@ type Walker struct {
 
 	// Counter records stats over all processed files, if non-nil.
 	Counter *metrics.Counter
+
+	fingerPrintFunc func(path string) (string, error)
 }
 
 // convert creates a File from the given information and if requested embeds the hash sum too.
@@ -103,13 +120,13 @@ func (w *Walker) convert(path string, info os.FileInfo) (*fspb.File, error) {
 
 	// Only build the hash sum if requested and if it is not a directory.
 	if w.wantHashing(path) && !info.IsDir() && info.Size() <= w.pol.MaxHashFileSize {
-		if shaSum, err := sha256sum(path); err != nil {
+		if fp, err := w.fingerPrintFunc(path); err != nil {
 			log.Printf("unable to build hash for %s: %s", path, err)
 		} else {
 			f.Fingerprint = []*fspb.Fingerprint{
 				{
-					Method: fspb.Fingerprint_SHA256,
-					Value:  shaSum,
+					Method: w.pol.FingerprintMethod,
+					Value:  fp,
 				},
 			}
 		}
