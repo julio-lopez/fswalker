@@ -27,6 +27,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/zeebo/blake3"
 	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
 )
@@ -62,6 +63,12 @@ func NormalizePath(path string, isDir bool) string {
 		p += string(filepath.Separator)
 	}
 	return p
+}
+
+func blake3sum(path string, maxBytes int64) (string, error) {
+	return fingerprintFile(path, maxBytes, func() hash.Hash {
+		return blake3.New()
+	})
 }
 
 // sha256sum reads a regular file at path up to maxBytes and builds a SHA-256
