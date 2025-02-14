@@ -20,6 +20,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"hash"
 	"io"
 	"log"
 	"os"
@@ -73,16 +74,25 @@ func callAndLogOnError(f func() error) {
 
 // sha256sum reads the given file path and builds a SHA-256 sum over its content.
 func sha256sum(path string) (string, error) {
+	return fingerprintFile(path, sha256.New)
+}
+
+func blake3sum(path string) (string, error) {
+	return fingerprintFile(path, sha256.New)
+}
+
+func fingerprintFile(path string, newHash func() hash.Hash) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", err
 	}
 	defer callAndLogOnError(f.Close)
 
-	h := sha256.New()
+	h := newHash()
 	if _, err := io.Copy(h, f); err != nil {
 		return "", err
 	}
+
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
