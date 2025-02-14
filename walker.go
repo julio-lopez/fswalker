@@ -61,6 +61,11 @@ func WalkerFromPolicyFile(ctx context.Context, path string) (*Walker, error) {
 		return nil, err
 	}
 
+	return WalkerFromPolicy(pol)
+}
+
+// WalkerFromPolicy creates a new Walker based on a policy.
+func WalkerFromPolicy(pol *fspb.Policy) (*Walker, error) {
 	fingerprintFunc := func(string, int64) (string, error) {
 		return "", errors.New("no fingerprinting function")
 	}
