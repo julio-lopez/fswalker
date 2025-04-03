@@ -256,19 +256,15 @@ func TestWriteTextProtoReviews(t *testing.T) {
 		},
 	}
 
-	tmpfile, err := os.CreateTemp("", "review.asciipb")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Remove(tmpfile.Name()) // clean up
+	tmpfileName := filepath.Join(t.TempDir(), "review.asciipb")
 
 	ctx := context.Background()
-	if err := writeTextProto(ctx, tmpfile.Name(), wantReviews); err != nil {
+	if err := writeTextProto(ctx, tmpfileName, wantReviews); err != nil {
 		t.Errorf("writeTextProto() error: %v", err)
 	}
 
 	gotReviews := &fspb.Reviews{}
-	if err := readTextProto(ctx, tmpfile.Name(), gotReviews); err != nil {
+	if err := readTextProto(ctx, tmpfileName, gotReviews); err != nil {
 		t.Errorf("readTextProto() error: %v", err)
 	}
 	diff := cmp.Diff(gotReviews, wantReviews, cmp.Comparer(proto.Equal))

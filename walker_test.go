@@ -313,11 +313,7 @@ func TestConvert(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	ctx := context.Background()
-	tmpfile, err := os.CreateTemp("", "walk.pb")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Remove(tmpfile.Name()) // clean up
+	tmpfileName := filepath.Join(t.TempDir(), "walk.pb")
 
 	dir := t.TempDir()
 	smallFile := filepath.Join(dir, "small.txt")
@@ -333,7 +329,7 @@ func TestRun(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	writer := outpathWriter(tmpfile.Name())
+	writer := outpathWriter(tmpfileName)
 	wlkr := &Walker{
 		pol: &fspb.Policy{
 			Include:         []string{dir},
@@ -367,13 +363,13 @@ func TestRun(t *testing.T) {
 		}
 	}
 
-	b, err := ReadFile(ctx, tmpfile.Name())
+	b, err := ReadFile(ctx, tmpfileName)
 	if err != nil {
-		t.Errorf("unable to read file %q: %v", tmpfile.Name(), err)
+		t.Errorf("unable to read file %q: %v", tmpfileName, err)
 	}
 	walk := &fspb.Walk{}
 	if err := proto.Unmarshal(b, walk); err != nil {
-		t.Errorf("unabled to decode proto file %q: %v", tmpfile.Name(), err)
+		t.Errorf("unabled to decode proto file %q: %v", tmpfileName, err)
 	}
 	st := walk.StartWalk.AsTime()
 	et := walk.StopWalk.AsTime()

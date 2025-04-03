@@ -170,11 +170,10 @@ func TestReadWalk(t *testing.T) {
 		t.Fatalf("problems marshaling walk: %v", err)
 	}
 
-	tmpfile, err := os.CreateTemp("", "walk.pb")
+	tmpfile, err := os.CreateTemp(t.TempDir(), "walk.pb")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpfile.Name()) // clean up
 	if _, err := tmpfile.Write(walkBytes); err != nil {
 		t.Fatal(err)
 	}
