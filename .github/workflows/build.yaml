@@ -78,8 +78,11 @@ jobs:
         install-go: false
     -
       name: golangci-lint
-      uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6.5.2
+      uses: golangci/golangci-lint-action@1481404843c368bc19ca9406f87d6e0fc97bdcfd # v7.0.0
       with:
-        version: v1.61.0
-        # skip-cache: true
-        # skip-save-cache: true
+        version: v2.0.2
+        # Use a long invalidation interval, the go.mod hash is more likely to
+        # change more frequently and force a cache invalidation anyway.
+        cache-invalidation-interval: 60
+        #skip-cache: true
+        #skip-save-cache: true
