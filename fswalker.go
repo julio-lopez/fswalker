@@ -23,7 +23,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
 
@@ -117,8 +116,7 @@ func writeTextProto(ctx context.Context, path string, pb proto.Message) error {
 		return err
 	}
 	// replace message boundary characters as curly braces look nicer (both is fine to parse)
-	blobStr := strings.Replace(strings.Replace(string(blob), "<", "{", -1), ">", "}", -1)
-	return WriteFile(ctx, path, []byte(blobStr), 0o644)
+	return WriteFile(ctx, path, angleToCurly(blob), 0o644)
 }
 
 // ReadFile reads the file named by filename and returns the contents.

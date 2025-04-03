@@ -15,6 +15,7 @@
 package fswalker
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"errors"
@@ -566,10 +567,9 @@ func (r *Reporter) UpdateReviewProto(ctx context.Context, walkFile *WalkFile, re
 	if err != nil {
 		return err
 	}
-	blobStr := string(blob)
+
 	fmt.Println("New review section:")
-	// replace message boundary characters as curly braces look nicer (both is fine to parse)
-	fmt.Println(strings.Replace(strings.Replace(blobStr, "<", "{", -1), ">", "}", -1))
+	fmt.Printf("%s\n", angleToCurly(blob))
 
 	if reviewFile != "" {
 		reviews := &fspb.Reviews{}
@@ -586,4 +586,17 @@ func (r *Reporter) UpdateReviewProto(ctx context.Context, walkFile *WalkFile, re
 		fmt.Println("No reviews file provided so you will have to update it manually.")
 	}
 	return nil
+}
+
+func angleToCurly(b []byte) []byte {
+	// replace message boundary characters as curly braces look nicer (both is fine to parse)
+	return bytes.Map(func(r rune) rune {
+		switch r {
+		case '<':
+			return '{'
+		case '>':
+			return '}'
+		}
+		return r
+	}, b)
 }
