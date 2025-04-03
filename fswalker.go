@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,13 +64,20 @@ func NormalizePath(path string, isDir bool) string {
 	return p
 }
 
+// helper for deferred calls
+func callAndLogOnError(f func() error) {
+	if err := f(); err != nil {
+		log.Println("error when calling (probably deferred) function:", err)
+	}
+}
+
 // sha256sum reads the given file path and builds a SHA-256 sum over its content.
 func sha256sum(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer callAndLogOnError(f.Close)
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
