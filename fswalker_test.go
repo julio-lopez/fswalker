@@ -209,7 +209,9 @@ func TestWriteTextProtoReviews(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpfile.Name()) // clean up
+	defer callAndLogOnError(func() error {
+		return os.Remove(tmpfile.Name()) // clean up
+	})
 
 	ctx := context.Background()
 	if err := writeTextProto(ctx, tmpfile.Name(), wantReviews); err != nil {
