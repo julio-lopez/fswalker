@@ -570,7 +570,7 @@ func (r *Reporter) UpdateReviewProto(ctx context.Context, walkFile *WalkFile, re
 	blobStr := string(blob)
 	fmt.Println("New review section:")
 	// replace message boundary characters as curly braces look nicer (both is fine to parse)
-	fmt.Println(strings.Replace(strings.Replace(blobStr, "<", "{", -1), ">", "}", -1))
+	fmt.Println(strings.ReplaceAll(strings.ReplaceAll(blobStr, "<", "{"), ">", "}"))
 
 	if reviewFile != "" {
 		reviews := &fspb.Reviews{}
