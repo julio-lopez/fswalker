@@ -102,7 +102,7 @@ func writeTextProto(ctx context.Context, path string, pb proto.Message) error {
 		return err
 	}
 	// replace message boundary characters as curly braces look nicer (both is fine to parse)
-	blobStr := strings.Replace(strings.Replace(string(blob), "<", "{", -1), ">", "}", -1)
+	blobStr := strings.ReplaceAll(strings.ReplaceAll(string(blob), "<", "{"), ">", "}")
 	return WriteFile(ctx, path, []byte(blobStr), 0644)
 }
 
