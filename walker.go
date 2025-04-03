@@ -177,7 +177,7 @@ func (w *Walker) isExcluded(path string) bool {
 }
 
 // process runs output functions for the given input File.
-func (w *Walker) process(ctx context.Context, f *fspb.File) error {
+func (w *Walker) process(_ context.Context, f *fspb.File) error {
 	// Print a short overview if we're running in verbose mode.
 	if w.Verbose {
 		fmt.Println(NormalizePath(f.Path, f.Info.IsDir))
