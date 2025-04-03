@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -174,7 +175,9 @@ func TestReadWalk(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpfile.Name()) // clean up
+	defer callAndLogOnError(func() error {
+		return os.Remove(tmpfile.Name()) // clean up
+	})
 	if _, err := tmpfile.Write(walkBytes); err != nil {
 		t.Fatal(err)
 	}
@@ -602,5 +605,12 @@ func TestCompare(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// helper for deferred calls
+func callAndLogOnError(f func() error) {
+	if err := f(); err != nil {
+		log.Println("error when calling (probably deferred) function:", err)
 	}
 }
