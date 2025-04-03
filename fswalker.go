@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -64,6 +65,13 @@ func NormalizePath(path string, isDir bool) string {
 	return p
 }
 
+// helper for deferred calls
+func callAndLogOnError(f func() error) {
+	if err := f(); err != nil {
+		log.Println("error when calling (probably deferred) function:", err)
+	}
+}
+
 // sha256sum reads a regular file at path up to maxBytes and builds a SHA-256
 // sum over its content. sha256sum returns an error if the file is larger than maxBytes.
 func sha256sum(path string, maxBytes int64) (string, error) {
@@ -76,7 +84,7 @@ func sha256sum(path string, maxBytes int64) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer callAndLogOnError(f.Close)
 
 	fi, err := f.Stat()
 	if err != nil {
@@ -118,7 +126,7 @@ func writeTextProto(ctx context.Context, path string, pb proto.Message) error {
 	}
 	// replace message boundary characters as curly braces look nicer (both is fine to parse)
 	blobStr := strings.Replace(strings.Replace(string(blob), "<", "{", -1), ">", "}", -1)
-	return WriteFile(ctx, path, []byte(blobStr), 0644)
+	return WriteFile(ctx, path, []byte(blobStr), 0o644)
 }
 
 // ReadFile reads the file named by filename and returns the contents.

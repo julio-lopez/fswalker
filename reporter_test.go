@@ -174,7 +174,9 @@ func TestReadWalk(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpfile.Name()) // clean up
+	defer callAndLogOnError(func() error {
+		return os.Remove(tmpfile.Name()) // clean up
+	})
 	if _, err := tmpfile.Write(walkBytes); err != nil {
 		t.Fatal(err)
 	}

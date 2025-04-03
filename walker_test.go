@@ -317,7 +317,9 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpfile.Name()) // clean up
+	defer callAndLogOnError(func() error {
+		return os.Remove(tmpfile.Name()) // clean up
+	})
 
 	dir := t.TempDir()
 	smallFile := filepath.Join(dir, "small.txt")
