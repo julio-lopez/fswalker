@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"path"
 	"sort"
 	"strings"
@@ -433,62 +434,62 @@ func (r *Reporter) Compare(before, after *fspb.Walk) (*Report, error) {
 
 // PrintDiffSummary prints the diffs found in a Report.
 func (r *Reporter) PrintDiffSummary(out io.Writer, report *Report) {
-	fmt.Fprintln(out, "===============================================================================")
-	fmt.Fprintln(out, "Object Summary:")
-	fmt.Fprintln(out, "===============================================================================")
+	outputln(out, "===============================================================================")
+	outputln(out, "Object Summary:")
+	outputln(out, "===============================================================================")
 
 	if len(report.Added) > 0 {
-		fmt.Fprintf(out, "Added (%d):\n", len(report.Added))
+		outputf(out, "Added (%d):\n", len(report.Added))
 		for _, file := range report.Added {
-			fmt.Fprintln(out, file.After.Path)
+			outputln(out, file.After.Path)
 		}
-		fmt.Fprintln(out)
+		outputln(out)
 	}
 	if len(report.Deleted) > 0 {
-		fmt.Fprintf(out, "Removed (%d):\n", len(report.Deleted))
+		outputf(out, "Removed (%d):\n", len(report.Deleted))
 		for _, file := range report.Deleted {
-			fmt.Fprintln(out, file.Before.Path)
+			outputln(out, file.Before.Path)
 		}
-		fmt.Fprintln(out)
+		outputln(out)
 	}
 	if len(report.Modified) > 0 {
-		fmt.Fprintf(out, "Modified (%d):\n", len(report.Modified))
+		outputf(out, "Modified (%d):\n", len(report.Modified))
 		for _, file := range report.Modified {
-			fmt.Fprintln(out, file.After.Path)
+			outputln(out, file.After.Path)
 			if r.Verbose {
-				fmt.Fprintln(out, file.Diff)
-				fmt.Fprintln(out)
+				outputln(out, file.Diff)
+				outputln(out)
 			}
 		}
-		fmt.Fprintln(out)
+		outputln(out)
 	}
 	if len(report.Errors) > 0 {
-		fmt.Fprintf(out, "Reporting Errors (%d):\n", len(report.Errors))
+		outputf(out, "Reporting Errors (%d):\n", len(report.Errors))
 		for _, file := range report.Errors {
-			fmt.Fprintf(out, "%s: %v\n", file.Before.Path, file.Err)
+			outputf(out, "%s: %v\n", file.Before.Path, file.Err)
 		}
-		fmt.Fprintln(out)
+		outputln(out)
 	}
 	if report.Empty() {
-		fmt.Fprintln(out, "No changes.")
+		outputln(out, "No changes.")
 	}
 	if report.WalkBefore != nil && len(report.WalkBefore.Notification) > 0 {
-		fmt.Fprintln(out, "Walking Errors for BEFORE file:")
+		outputln(out, "Walking Errors for BEFORE file:")
 		for _, err := range report.WalkBefore.Notification {
 			if r.Verbose || (err.Severity != fspb.Notification_UNKNOWN && err.Severity != fspb.Notification_INFO) {
-				fmt.Fprintf(out, "%s(%s): %s\n", err.Severity, err.Path, err.Message)
+				outputf(out, "%s(%s): %s\n", err.Severity, err.Path, err.Message)
 			}
 		}
-		fmt.Fprintln(out)
+		outputln(out)
 	}
 	if len(report.WalkAfter.Notification) > 0 {
-		fmt.Fprintln(out, "Walking Errors for AFTER file:")
+		outputln(out, "Walking Errors for AFTER file:")
 		for _, err := range report.WalkAfter.Notification {
 			if r.Verbose || (err.Severity != fspb.Notification_UNKNOWN && err.Severity != fspb.Notification_INFO) {
-				fmt.Fprintf(out, "%s(%s): %s\n", err.Severity, err.Path, err.Message)
+				outputf(out, "%s(%s): %s\n", err.Severity, err.Path, err.Message)
 			}
 		}
-		fmt.Fprintln(out)
+		outputln(out)
 	}
 }
 
@@ -496,40 +497,40 @@ func (r *Reporter) PrintDiffSummary(out io.Writer, report *Report) {
 func (r *Reporter) printWalkSummary(out io.Writer, walk *fspb.Walk) {
 	awst := walk.StartWalk.AsTime()
 	awet := walk.StopWalk.AsTime()
-	fmt.Fprintf(out, "  - ID: %s\n", walk.Id)
-	fmt.Fprintf(out, "  - Start Time: %s\n", awst)
-	fmt.Fprintf(out, "  - Stop Time: %s\n", awet)
+	outputf(out, "  - ID: %s\n", walk.Id)
+	outputf(out, "  - Start Time: %s\n", awst)
+	outputf(out, "  - Stop Time: %s\n", awet)
 }
 
 // PrintReportSummary prints a few key information pieces around the Report.
 func (r *Reporter) PrintReportSummary(out io.Writer, report *Report) {
-	fmt.Fprintln(out, "===============================================================================")
-	fmt.Fprintln(out, "Report Summary:")
-	fmt.Fprintln(out, "===============================================================================")
-	fmt.Fprintf(out, "Host name: %s\n", report.WalkAfter.Hostname)
-	fmt.Fprintf(out, "Report config used: %s\n", r.configPath)
+	outputln(out, "===============================================================================")
+	outputln(out, "Report Summary:")
+	outputln(out, "===============================================================================")
+	outputf(out, "Host name: %s\n", report.WalkAfter.Hostname)
+	outputf(out, "Report config used: %s\n", r.configPath)
 	if report.WalkBefore != nil {
-		fmt.Fprintln(out, "Walk (Before)")
+		outputln(out, "Walk (Before)")
 		r.printWalkSummary(out, report.WalkBefore)
 	}
-	fmt.Fprintln(out, "Walk (After)")
+	outputln(out, "Walk (After)")
 	r.printWalkSummary(out, report.WalkAfter)
-	fmt.Fprintln(out)
+	outputln(out)
 }
 
 // PrintRuleSummary prints the configs and policies involved in creating the Walk and Report.
 func (r *Reporter) PrintRuleSummary(out io.Writer, report *Report) error {
-	fmt.Fprintln(out, "===============================================================================")
-	fmt.Fprintln(out, "Rule Summary:")
-	fmt.Fprintln(out, "===============================================================================")
+	outputln(out, "===============================================================================")
+	outputln(out, "Rule Summary:")
+	outputln(out, "===============================================================================")
 
 	if report.WalkBefore != nil {
 		diff := cmp.Diff(report.WalkBefore.Policy, report.WalkAfter.Policy, cmp.Comparer(proto.Equal))
 		if diff != "" {
-			fmt.Fprintln(out, "Walks policy diff:")
-			fmt.Fprintln(out, diff)
+			outputln(out, "Walks policy diff:")
+			outputln(out, diff)
 		} else {
-			fmt.Fprintln(out, "No changes.")
+			outputln(out, "No changes.")
 		}
 	}
 	if r.Verbose {
@@ -546,7 +547,7 @@ func (r *Reporter) PrintRuleSummary(out io.Writer, report *Report) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(out, "Policy:\n%s\nReport Config:\n%s\n", string(policyBytes), string(configBytes))
+		outputf(out, "Policy:\n%s\nReport Config:\n%s\n", string(policyBytes), string(configBytes))
 	}
 	return nil
 }
@@ -589,4 +590,20 @@ func (r *Reporter) UpdateReviewProto(ctx context.Context, walkFile *WalkFile, re
 		fmt.Println("No reviews file provided so you will have to update it manually.")
 	}
 	return nil
+}
+
+func outputln(w io.Writer, args ...any) {
+	_, err := fmt.Fprintln(w, args...)
+	logOnFprintError(err)
+}
+
+func outputf(w io.Writer, format string, args ...any) {
+	_, err := fmt.Fprintf(w, format, args...)
+	logOnFprintError(err)
+}
+
+func logOnFprintError(err error) {
+	if err != nil {
+		log.Println("Fprint error:", err)
+	}
 }
