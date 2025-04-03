@@ -140,7 +140,7 @@ func main() {
 	}
 
 	if before == nil {
-		fmt.Fprintln(out, "No before walk found. Using after walk only.")
+		outputln(out, "No before walk found. Using after walk only.")
 	}
 	rptr.PrintReportSummary(out, report)
 	if err := rptr.PrintRuleSummary(out, report); err != nil {
@@ -148,10 +148,10 @@ func main() {
 	}
 	rptr.PrintDiffSummary(out, report)
 
-	fmt.Fprintln(out, "Metrics:")
+	outputln(out, "Metrics:")
 	for _, k := range report.Counter.Metrics() {
 		v, _ := report.Counter.Get(k)
-		fmt.Fprintf(out, "[%-30s] = %6d\n", k, v)
+		outputf(out, "[%-30s] = %6d\n", k, v)
 	}
 
 	if *paginate {
@@ -170,5 +170,21 @@ func main() {
 		}
 	} else {
 		fmt.Println("not updating reviews file")
+	}
+}
+
+func outputln(w io.Writer, args ...any) {
+	_, err := fmt.Fprintln(w, args...)
+	logOnFprintError(err)
+}
+
+func outputf(w io.Writer, format string, args ...any) {
+	_, err := fmt.Fprintf(w, format, args...)
+	logOnFprintError(err)
+}
+
+func logOnFprintError(err error) {
+	if err != nil {
+		log.Println("Fprint error:", err)
 	}
 }
