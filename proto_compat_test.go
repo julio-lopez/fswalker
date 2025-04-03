@@ -189,7 +189,7 @@ func writeProtoText(t *testing.T, m proto.Message, filename string) {
 		t.Fatal("problems marshaling proto message:", err)
 	}
 
-	b = bytes.Replace(bytes.Replace(b, []byte("<"), []byte("{"), -1), []byte(">"), []byte("}"), -1)
+	b = bytes.ReplaceAll(bytes.ReplaceAll(b, []byte("<"), []byte("{")), []byte(">"), []byte("}"))
 
 	if err = os.WriteFile(filename, b, 0644); err != nil {
 		t.Fatal(err)
