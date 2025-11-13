@@ -10,38 +10,38 @@ jobs:
       contents: read
 
     steps:
-      -
-        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
-        with:
-          egress-policy: audit
-      -
-        name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      -
-        name: Setup Go
-        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
-        with:
-          cache: true
-          check-latest: true
-          go-version-file: 'go.mod'
-      -
-        name: Downnlaod Go modules
-        run: go mod download -json
-      -
-        name: Install golint
-        run: go install golang.org/x/lint/golint@latest
-      -
-        name: Check formatting
-        run: gofmt -d -e -l -s .
-      -
-        name: Lint
-        run: golint -set_exit_status ./...
-      -
-        name: Build and test
-        run: |
-          go test -v ./...
-          go build ./cmd/walker
-          go build ./cmd/reporter
+    -
+      uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+    -
+      name: Check out repository
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+    -
+      name: Setup Go
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+      with:
+        cache: true
+        check-latest: true
+        go-version-file: 'go.mod'
+    -
+      name: Downnlaod Go modules
+      run: go mod download -json
+    -
+      name: Install golint
+      run: go install golang.org/x/lint/golint@latest
+    -
+      name: Check formatting
+      run: gofmt -d -e -l -s .
+    -
+      name: Lint
+      run: golint -set_exit_status ./...
+    -
+      name: Build and test
+      run: |
+        go test -v ./...
+        go build ./cmd/walker
+        go build ./cmd/reporter
 
   checks:
     name: Static Checks
