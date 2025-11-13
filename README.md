@@ -2,7 +2,7 @@
 
 A simple and fast file system integrity checking tool in Go.
 
-[![Build Status](https://github.com/google/fswalker/actions/workflows/test.yml/badge.svg)](https://github.com/google/fswalker/actions/workflows/test.yml)
+[![Build](https://github.com/julio-lopez/fswalker/actions/workflows/build.yaml/badge.svg)](https://github.com/julio-lopez/fswalker/actions/workflows/build.yaml)
 
 ## Overview
 
