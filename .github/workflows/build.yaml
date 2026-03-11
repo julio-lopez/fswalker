@@ -75,7 +75,7 @@ jobs:
         # An explicit Go version is needed for govulncheck-action since internally
         # it uses an outdated setup-go@v5.0 action that does not respect the 'toolchain'
         # directive in the 'go.mod' file.
-        go-version-input: '1.25.4'
+        go-version-input: '1.25.8'
         repo-checkout: false
     -
       name: Build
