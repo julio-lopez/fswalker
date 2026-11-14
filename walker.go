@@ -61,7 +61,7 @@ func WalkerFromPolicyFile(ctx context.Context, path string) (*Walker, error) {
 		return nil, err
 	}
 
-	fingerprintFunc := func(string) (string, error) {
+	fingerprintFunc := func(string, int64) (string, error) {
 		return "", errors.New("no fingerprinting function")
 	}
 
@@ -102,7 +102,7 @@ type Walker struct {
 	// Counter records stats over all processed files, if non-nil.
 	Counter *metrics.Counter
 
-	fingerPrintFunc func(path string) (string, error)
+	fingerPrintFunc func(path string, maxBytes int64) (string, error)
 }
 
 // convert creates a File from the given information and if requested embeds the hash sum too.
