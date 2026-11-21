@@ -104,11 +104,11 @@ func TestSha256sum(t *testing.T) {
 	dir := t.TempDir()
 	content := []byte("hello world")
 	testFilePath := filepath.Join(dir, "file.txt")
-	if err := os.WriteFile(testFilePath, content, 0600); err != nil {
+	if err := os.WriteFile(testFilePath, content, 0o600); err != nil {
 		t.Fatalf("os.WriteFile(%q) failed: %v", testFilePath, err)
 	}
 	emptyPath := filepath.Join(dir, "empty")
-	if err := os.WriteFile(emptyPath, nil, 0600); err != nil {
+	if err := os.WriteFile(emptyPath, nil, 0o600); err != nil {
 		t.Fatalf("os.WriteFile(%q) failed: %v", emptyPath, err)
 	}
 	symlinkPath := filepath.Join(dir, "link")
@@ -116,7 +116,7 @@ func TestSha256sum(t *testing.T) {
 		t.Fatalf("os.Symlink(%q, %q) failed: %v", testFilePath, symlinkPath, err)
 	}
 	fifoPath := filepath.Join(dir, "pipe")
-	if err := syscall.Mkfifo(fifoPath, 0600); err != nil {
+	if err := syscall.Mkfifo(fifoPath, 0o600); err != nil {
 		t.Fatalf("syscall.Mkfifo(%q) failed: %v", fifoPath, err)
 	}
 
