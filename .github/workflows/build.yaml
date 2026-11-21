@@ -86,7 +86,6 @@ jobs:
     -
       name: golangci-lint
       uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
-      if: ${{ !cancelled() && steps.setup_go.conclusion == 'success' }}
       with:
         version: v2.15.0
         # Use a long invalidation interval, the go.mod hash is more likely to
@@ -97,7 +96,6 @@ jobs:
     -
       name: staticcheck
       uses: dominikh/staticcheck-action@9716614d4101e79b4340dd97b10e54d68234e431 # v1.4.1
-      if: ${{ !cancelled() && steps.setup_go.conclusion == 'success' }}
       continue-on-error: true
       with:
         version: "2025.1.1"
