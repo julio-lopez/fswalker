@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"syscall"
@@ -87,7 +88,11 @@ func fingerprintFile(path string, maxBytes int64, newHash func() hash.Hash) (str
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer func() {
+		if cerr := f.Close(); cerr != nil {
+			log.Println("closing file", path, err)
+		}
+	}()
 
 	fi, err := f.Stat()
 	if err != nil {
