@@ -28,7 +28,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/google/fswalker/internal/metrics"
 	fspb "github.com/google/fswalker/proto/fswalker"
 )
 
@@ -223,14 +222,13 @@ func TestConvert(t *testing.T) {
 	if err := os.WriteFile(path, []byte("hello"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	wlkr := &Walker{
-		pol: &fspb.Policy{
-			HashPfx: []string{
-				dir,
-			},
-			MaxHashFileSize: 1048576,
+	wlkr := mustWalkerFromPolicy(t, &fspb.Policy{
+		HashPfx: []string{
+			dir,
 		},
-	}
+		MaxHashFileSize:   1048576,
+		FingerprintMethod: fspb.Fingerprint_SHA256,
+	})
 	st := syscall.Stat_t{
 		Dev:     1,
 		Ino:     123456,
@@ -330,15 +328,13 @@ func TestRun(t *testing.T) {
 	}
 
 	writer := outpathWriter(tmpfileName)
-	wlkr := &Walker{
-		pol: &fspb.Policy{
-			Include:         []string{dir},
-			HashPfx:         []string{dir},
-			MaxHashFileSize: 6, // larger than smallFile, but smaller than largeFile.
-		},
-		WalkCallback: writer.writeWalk,
-		Counter:      &metrics.Counter{},
-	}
+	wlkr := mustWalkerFromPolicy(t, &fspb.Policy{
+		Include:         []string{dir},
+		HashPfx:         []string{dir},
+		MaxHashFileSize: 6, // larger than smallFile, but smaller than largeFile.
+	})
+
+	wlkr.WalkCallback = writer.writeWalk
 
 	if err := wlkr.Run(ctx); err != nil {
 		t.Errorf("Run() error: %v", err)
@@ -399,4 +395,15 @@ func TestRun(t *testing.T) {
 	if diff := cmp.Diff(wantFingerprints, gotFingerprints, cmp.Comparer(proto.Equal)); diff != "" {
 		t.Errorf("Run() fingerprints diff (-want +got):\n%s", diff)
 	}
+}
+
+func mustWalkerFromPolicy(tb testing.TB, pol *fspb.Policy) *Walker {
+	tb.Helper()
+
+	w, err := walkerFromPolicy(pol)
+	if err != nil {
+		tb.Fatal("could not create walker from policy:", err)
+	}
+
+	return w
 }
