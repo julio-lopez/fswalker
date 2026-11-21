@@ -39,7 +39,7 @@ func (o outpathWriter) writeWalk(ctx context.Context, walk *fspb.Walk) error {
 	if err != nil {
 		return err
 	}
-	return WriteFile(ctx, string(o), walkBytes, 0444)
+	return WriteFile(ctx, string(o), walkBytes, 0o444)
 }
 
 // testFile implements the os.FileInfo interface.
@@ -220,7 +220,7 @@ func TestWantHashing(t *testing.T) {
 func TestConvert(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "hashSumTest")
-	if err := os.WriteFile(path, []byte("hello"), 0600); err != nil {
+	if err := os.WriteFile(path, []byte("hello"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	wlkr := &Walker{
@@ -321,11 +321,11 @@ func TestRun(t *testing.T) {
 
 	dir := t.TempDir()
 	smallFile := filepath.Join(dir, "small.txt")
-	if err := os.WriteFile(smallFile, []byte("hello"), 0600); err != nil {
+	if err := os.WriteFile(smallFile, []byte("hello"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	largeFile := filepath.Join(dir, "large.txt")
-	if err := os.WriteFile(largeFile, []byte("hello world"), 0600); err != nil {
+	if err := os.WriteFile(largeFile, []byte("hello world"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	linkFile := filepath.Join(dir, "link.txt")
