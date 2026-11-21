@@ -28,7 +28,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/google/fswalker/internal/metrics"
 	fspb "github.com/google/fswalker/proto/fswalker"
 )
 
@@ -223,13 +222,15 @@ func TestConvert(t *testing.T) {
 	if err := os.WriteFile(path, []byte("hello"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	wlkr := &Walker{
-		pol: &fspb.Policy{
-			HashPfx: []string{
-				dir,
-			},
-			MaxHashFileSize: 1048576,
+	wlkr, err := WalkerFromPolicy(&fspb.Policy{
+		HashPfx: []string{
+			dir,
 		},
+		MaxHashFileSize:   1048576,
+		FingerprintMethod: fspb.Fingerprint_SHA256,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 	st := syscall.Stat_t{
 		Dev:     1,
@@ -334,15 +335,16 @@ func TestRun(t *testing.T) {
 	}
 
 	writer := outpathWriter(tmpfile.Name())
-	wlkr := &Walker{
-		pol: &fspb.Policy{
-			Include:         []string{dir},
-			HashPfx:         []string{dir},
-			MaxHashFileSize: 6, // larger than smallFile, but smaller than largeFile.
-		},
-		WalkCallback: writer.writeWalk,
-		Counter:      &metrics.Counter{},
+	wlkr, err := WalkerFromPolicy(&fspb.Policy{
+		Include:         []string{dir},
+		HashPfx:         []string{dir},
+		MaxHashFileSize: 6, // larger than smallFile, but smaller than largeFile.
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	wlkr.WalkCallback = writer.writeWalk
 
 	if err := wlkr.Run(ctx); err != nil {
 		t.Errorf("Run() error: %v", err)
