@@ -5,12 +5,15 @@ updates:
     open-pull-requests-limit: 4
     schedule:
       interval: weekly
+    allow:
+    - dependency-type: "all"
     groups:
       common-golang-dependencies:
         patterns:
         - "cloud.google.com/*"
         - "github.com/aws/aws-sdk-go/*"
         - "github.com/Azure/azure-sdk-for-go/sdk/*"
+        - "github.com/google/*"
         - "github.com/minio/minio-go/*"
         - "golang.org/x/*"
         - "google.golang.org/*"
